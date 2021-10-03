@@ -3,3 +3,33 @@ title: "p8105_hw2_zv2138"
 output: github_document
 ---
 
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+# Problem 1
+
+## Read and clean the Mr. Trash Wheel Sheet
+```{r}
+trash_wheel = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 1, range = "A2:N408") %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    sports_balls = round(sports_balls, digits = 0)
+  ) %>% 
+  filter(!(str_detect(month, "Total")))
+```
+
+## Read and Clean Precipitation data for 2018 and 2019
+```{r}
+Rain_2019 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 4, range = "A2:B14") %>% 
+    janitor::clean_names() %>% 
+    mutate(
+      year = 2019
+    )
+Rain_2018 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 5, range = "A2:B14") %>% 
+    janitor::clean_names() %>% 
+    mutate(
+       year = 2018
+    )
+```
