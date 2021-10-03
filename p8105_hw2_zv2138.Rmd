@@ -22,14 +22,23 @@ trash_wheel = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 
 
 ## Read and Clean Precipitation data for 2018 and 2019
 ```{r}
-Rain_2019 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 4, range = "A2:B14") %>% 
+rain_2019 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 4, range = "A2:B14") %>% 
     janitor::clean_names() %>% 
     mutate(
       year = 2019
     )
-Rain_2018 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 5, range = "A2:B14") %>% 
+rain_2018 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 5, range = "A2:B14") %>% 
     janitor::clean_names() %>% 
     mutate(
        year = 2018
     )
 ```
+
+## Combining Precipitation data sets 
+```{r}
+rain_data =
+  left_join(rain_2018, rain_2019, by = "month") 
+```
+
+
+# Problem 2
