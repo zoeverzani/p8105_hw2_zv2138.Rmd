@@ -24,10 +24,11 @@ trash_wheel = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 
 ```{r}
 rain_2019 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 4, range = "A2:B14") %>% 
     janitor::clean_names() %>% 
+    na.omit %>% 
     mutate(
       year = 2019
     )
-rain_2018 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 5, range = "A2:B14") %>% 
+rain_2018 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 5, range = "A2:B14",) %>% 
     janitor::clean_names() %>% 
     mutate(
        year = 2018
@@ -36,9 +37,15 @@ rain_2018 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 5,
 
 ## Combining Precipitation data sets 
 ```{r}
-rain_data =
-  left_join(rain_2018, rain_2019, by = "month") 
+rain_data = bind_rows(rain_2018, rain_2019) %>% 
+  mutate(
+    month = month.name[month]
+  )
 ```
+
+Mr. Trash Wheel filled `r nrow(trash_wheel)` dumpsters from `r min(pull(trash_wheel,date))` to `r max(pull(trash_wheel,date))`. In total `r sum(pull(trash_wheel, weight_tons))` tons of trash was collected during this time period. Mr. Trash Wheel collected various types of trash including `r colnames(trash_wheel[7:13])`. In fact the median number of sports balls that could be found in a dumpster in 2019 was `r median(pull(filter(trash_wheel,year == 2019), sports_balls))`.
+
+Precipitation data was also collected over the years 2018 and 2019. Over the two years a total of `r sum(pull(rain_data, total))` inches of rain fell. In 2018 alone `r sum(pull(filter(rain_data, year == 2018), total))`.
 
 
 # Problem 2
