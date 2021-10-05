@@ -3,7 +3,7 @@ title: "p8105_hw2_zv2138"
 output: github_document
 ---
 
-```{r}
+```{r Set Up}
 library(tidyverse)
 library(readxl)
 ```
@@ -39,13 +39,56 @@ rain_2018 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 5,
 ```{r}
 rain_data = bind_rows(rain_2018, rain_2019) %>% 
   mutate(
-    month = month.name[month]
+    month = str_to_lower(month.name[month])
   )
 ```
 
 Mr. Trash Wheel filled `r nrow(trash_wheel)` dumpsters from `r min(pull(trash_wheel,date))` to `r max(pull(trash_wheel,date))`. In total `r sum(pull(trash_wheel, weight_tons))` tons of trash was collected during this time period. Mr. Trash Wheel collected various types of trash including `r colnames(trash_wheel[7:13])`. In fact the median number of sports balls that could be found in a dumpster in 2019 was `r median(pull(filter(trash_wheel,year == 2019), sports_balls))`.
 
-Precipitation data was also collected over the years 2018 and 2019. Over the two years a total of `r sum(pull(rain_data, total))` inches of rain fell. In 2018 alone `r sum(pull(filter(rain_data, year == 2018), total))`.
-
+Precipitation data was also collected over the years 2018 and 2019. Over the two years a total of `r sum(pull(rain_data, total))` inches of rain fell. In 2018 alone `r sum(pull(filter(rain_data, year == 2018), total))` inches of rain fell.
 
 # Problem 2
+
+## Read and Clean pols-month.csv
+```{r}
+pols_month = read_csv("./pols-month.csv", show_col_types = F) %>% 
+  janitor::clean_names() %>% 
+  mutate(mon = as.character(mon)) %>% 
+  separate(mon, into = c("year","month", "day"), sep = "-") %>% 
+  mutate(year = as.integer(year)) %>% 
+  mutate(month = as.integer(month)) %>% 
+  mutate(month = str_to_lower(month.name[month])) %>% 
+  mutate(prez_dem = ifelse(prez_dem == 1, "D", "")) %>% 
+  mutate(prez_gop = ifelse(prez_gop == 1, "R", "")) %>% 
+  mutate(president = paste(prez_gop,prez_dem)) %>% 
+  mutate(president = str_trim(president)) %>% 
+  subset(select = -c(day, prez_gop, prez_dem))
+```
+
+## Read and Clean snp.csv
+```{r}
+snp = read_csv("./snp.csv", show_col_types = F) %>% 
+  janitor::clean_names() %>% 
+  mutate(date = as.character(date)) %>% 
+  separate(date, into = c("month", "day", "year"), sep = "/") %>% 
+  mutate(year = as.integer(year)) %>% 
+  mutate(year = (ifelse(year <= 15, year + 2000, year + 1900))) %>% 
+  mutate(month = as.integer(month)) %>%
+  mutate(month = str_to_lower(month.name[month])) %>% 
+  subset(select = -(day)) %>% 
+  relocate(year, month)
+```
+
+## Read and Clean unemployment.csv 
+```{r}
+unemployment = read_csv("./unemployment.csv", show_col_types = F) %>% 
+  janitor::clean_names() %>% 
+  pivot_longer(
+    jan:dec,
+    names_to = "month", 
+    values_to = "percent_unemployed"
+  ) %>% 
+  mutate(month = match(month, tolower(month.abb))) %>% 
+  mutate(month = str_to_lower(month.name[month]))
+```
+
