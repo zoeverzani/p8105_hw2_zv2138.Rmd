@@ -58,8 +58,8 @@ pols_month = read_csv("./pols-month.csv", show_col_types = F) %>%
   mutate(year = as.integer(year)) %>% 
   mutate(month = as.integer(month)) %>% 
   mutate(month = str_to_lower(month.name[month])) %>% 
-  mutate(prez_dem = ifelse(prez_dem == 1, "D", "")) %>% 
-  mutate(prez_gop = ifelse(prez_gop == 1, "R", "")) %>% 
+  mutate(prez_dem = ifelse(prez_dem == 1, "dem", "")) %>% 
+  mutate(prez_gop = ifelse(prez_gop == 1, "gop", "")) %>% 
   mutate(president = paste(prez_gop,prez_dem)) %>% 
   mutate(president = str_trim(president)) %>% 
   subset(select = -c(day, prez_gop, prez_dem))
@@ -91,4 +91,11 @@ unemployment = read_csv("./unemployment.csv", show_col_types = F) %>%
   mutate(month = match(month, tolower(month.abb))) %>% 
   mutate(month = str_to_lower(month.name[month]))
 ```
+
+## Merge unemployment, snp, and pols_month
+```{r}
+joined_df = left_join(pols_month, snp, by = c("year", "month"))
+joined_df = left_join(joined_df, unemployment, by = c("year", "month"))   
+```
+
 
