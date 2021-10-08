@@ -12,23 +12,24 @@ library(readxl)
 
 ## Read and clean the Mr. Trash Wheel Sheet
 ```{r}
-trash_wheel = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 1, range = "A2:N408") %>% 
+trash_wheel = read_excel("./Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet = 1, range = "A2:N535") %>% 
   janitor::clean_names() %>% 
+  filter(!(str_detect(month, "Total"))) %>% 
   mutate(
-    sports_balls = round(sports_balls, digits = 0)
-  ) %>% 
-  filter(!(str_detect(month, "Total")))
+    sports_balls = round(sports_balls, digits = 0),
+    month = str_to_lower(month),
+    month = str_replace_all(month,"decemeber", "december")
+  ) 
 ```
 
 ## Read and Clean Precipitation data for 2018 and 2019
 ```{r}
-rain_2019 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 4, range = "A2:B14") %>% 
+rain_2019 = read_excel("./Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet = 6, range = "A2:B14") %>% 
     janitor::clean_names() %>% 
-    na.omit %>% 
     mutate(
       year = 2019
     )
-rain_2018 = read_excel("./Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = 5, range = "A2:B14",) %>% 
+rain_2018 = read_excel("./Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet = 7, range = "A2:B14",) %>% 
     janitor::clean_names() %>% 
     mutate(
        year = 2018
@@ -98,4 +99,28 @@ joined_df = left_join(pols_month, snp, by = c("year", "month"))
 joined_df = left_join(joined_df, unemployment, by = c("year", "month"))   
 ```
 
+Pols_month data file contains data on the number of national politicians (governors, senators, and presidents) who are democratic or republican at any given time. Pols_month has data on `r nrow(pols_month)` politicians. Data was collected from `r min(pull(pols_month,year))` to `r max(pull(pols_month,year))`. 
+
+Snp data file contains data on the closing values of the Standard and Poor's stock market index for a given date. Snp has data from `r nrow(snp)` index observations. Data was collected from `r min(pull(snp,year))` to `r max(pull(snp,year))`. 
+
+Unemployment data file contains data on the the percentage of unemployment on given year and month. The file contains `r nrow(unemployment)` data entries. Data was collected from `r min(pull(unemployment,year))` to `r max(pull(unemployment,year))`. 
+
+The three data files were merged together to create the data set joined_df. This file contains `r nrow(joined_df)` observations. Data was collected from  `r min(pull(joined_df,year))` to `r max(pull(joined_df,year))`. 
+
+# Problem 3
+
+## Load and tidy the data - Popular Baby Names
+```{r}
+baby_names = read_csv("./Popular_Baby_Names.csv", show_col_types = F) %>% 
+  janitor::clean_names() %>% 
+  unique() %>% 
+  mutate(ethnicity = str_replace_all(ethnicity,"ASIAN AND PACI$", "ASIAN AND PACIFIC ISLANDER")) %>% 
+  mutate(ethnicity = str_replace_all(ethnicity,"BLACK NON HISP$", "BLACK NON HISPANIC")) %>% 
+  mutate(ethnicity = str_replace_all(ethnicity,"WHITE NON HISP$", "WHITE NON HISPANIC"))
+
+
+olivia = filter(baby_names, childs_first_name == "Olivia", gender == "FEMALE")
+pivot_longer(olivia, !ethnicity, names_to = "year_of_birth", values_to = "rank")
+
+```
 
