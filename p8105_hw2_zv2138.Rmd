@@ -116,11 +116,35 @@ baby_names = read_csv("./Popular_Baby_Names.csv", show_col_types = F) %>%
   unique() %>% 
   mutate(ethnicity = str_replace_all(ethnicity,"ASIAN AND PACI$", "ASIAN AND PACIFIC ISLANDER")) %>% 
   mutate(ethnicity = str_replace_all(ethnicity,"BLACK NON HISP$", "BLACK NON HISPANIC")) %>% 
-  mutate(ethnicity = str_replace_all(ethnicity,"WHITE NON HISP$", "WHITE NON HISPANIC"))
+  mutate(ethnicity = str_replace_all(ethnicity,"WHITE NON HISP$", "WHITE NON HISPANIC")) %>% 
+  # did you make all names and ehtnicty lower case
 
+```
 
+## Creating Olivia Table
+```{r}
 olivia = filter(baby_names, childs_first_name == "Olivia", gender == "FEMALE")
-pivot_longer(olivia, !ethnicity, names_to = "year_of_birth", values_to = "rank")
+olivia = subset(olivia, select = c(ethnicity, year_of_birth, rank))
+olivia = pivot_wider(olivia, ethnicity, names_from = "year_of_birth", values_from = "rank")
+knitr::kable(olivia)
+```
 
+## Creating Plot of Popular Male Names 
+```{r}
+male_names = filter(baby_names, rank == 1, gender == "MALE")
+male_names = subset(male_names, select = c(ethnicity, year_of_birth, childs_first_name))
+male_names = pivot_wider(male_names, ethnicity, names_from = "year_of_birth", values_from = "childs_first_name")
+knitr::kable(male_names)
+```
+
+
+## Creating Plot
+```{r}
+male_wnh_2016_plot = ggplot(filter(baby_names, gender == "MALE", ethnicity == "WHITE NON HISPANIC", year_of_birth == 2016),
+       aes(x = rank, y = count )) + geom_point() + ggtitle("2016 White Male Non Hispanic Popular Names")
+
+male_wnh_2016_plot
+
+#ggsave(Nmaes_plot.pdf, male_wnh_2016_plot, width = 8, height = 5)
 ```
 
