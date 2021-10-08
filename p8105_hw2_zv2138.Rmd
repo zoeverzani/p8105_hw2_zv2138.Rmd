@@ -94,8 +94,8 @@ unemployment = read_csv("./unemployment.csv", show_col_types = F) %>%
 
 ## Merge unemployment, snp, and pols_month
 ```{r}
-joined_df = left_join(pols_month, snp, by = c("year", "month"))
-joined_df = left_join(joined_df, unemployment, by = c("year", "month"))   
+joined_df = left_join(pols_month, snp, by = c("year", "month")) %>% 
+            left_join(unemployment, by = c("year", "month"))   
 ```
 
 Pols_month data file contains data on the number of national politicians (governors, senators, and presidents) who are democratic or republican at any given time. Pols_month has data on `r nrow(pols_month)` politicians. Data was collected from `r min(pull(pols_month,year))` to `r max(pull(pols_month,year))`. 
@@ -104,7 +104,8 @@ Snp data file contains data on the closing values of the Standard and Poor's sto
 
 Unemployment data file contains data on the the percentage of unemployment on given year and month. The file contains `r nrow(unemployment)` data entries. Data was collected from `r min(pull(unemployment,year))` to `r max(pull(unemployment,year))`. 
 
-The three data files were merged together to create the data set joined_df. This file contains `r nrow(joined_df)` observations. Data was collected from  `r min(pull(joined_df,year))` to `r max(pull(joined_df,year))`. 
+The three data files were merged together to create the data set joined_df. This file contains `r nrow(joined_df)` observations. Data was collected from  `r min(pull(joined_df,year))` to `r max(pull(joined_df,year))`. Some key variables in this new data file include percent_unemployed and president - which indicates if a president was a democrat or republican for a given year. 
+
 
 # Problem 3
 
@@ -112,37 +113,34 @@ The three data files were merged together to create the data set joined_df. This
 ```{r}
 baby_names = read_csv("./Popular_Baby_Names.csv", show_col_types = F) %>% 
   janitor::clean_names() %>% 
-  unique() %>% 
   mutate(ethnicity = str_replace_all(ethnicity,"ASIAN AND PACI$", "ASIAN AND PACIFIC ISLANDER")) %>% 
   mutate(ethnicity = str_replace_all(ethnicity,"BLACK NON HISP$", "BLACK NON HISPANIC")) %>% 
-  mutate(ethnicity = str_replace_all(ethnicity,"WHITE NON HISP$", "WHITE NON HISPANIC"))
-  # did you make all names and ehtnicty lower case
-
+  mutate(ethnicity = str_replace_all(ethnicity,"WHITE NON HISP$", "WHITE NON HISPANIC")) %>% 
+  mutate(childs_first_name = str_to_lower(childs_first_name)) %>% 
+  unique() 
 ```
 
 ## Creating Olivia Table
 ```{r}
-olivia = filter(baby_names, childs_first_name == "Olivia", gender == "FEMALE")
-olivia = subset(olivia, select = c(ethnicity, year_of_birth, rank))
-olivia = pivot_wider(olivia, ethnicity, names_from = "year_of_birth", values_from = "rank")
-knitr::kable(olivia)
+olivia = filter(baby_names, childs_first_name == "olivia" ) %>% 
+         select(c(ethnicity, year_of_birth, rank)) %>% 
+         arrange(year_of_birth) %>% 
+         pivot_wider(ethnicity, names_from = "year_of_birth", values_from = "rank")
+knitr::kable(olivia, caption = "Popularity of Olivia for NYC Baby Names")
 ```
 
 ## Creating Plot of Popular Male Names 
 ```{r}
-male_names = filter(baby_names, rank == 1, gender == "MALE")
-male_names = subset(male_names, select = c(ethnicity, year_of_birth, childs_first_name))
-male_names = pivot_wider(male_names, ethnicity, names_from = "year_of_birth", values_from = "childs_first_name")
-knitr::kable(male_names)
+male_names = filter(baby_names, rank == 1, gender == "MALE") %>% 
+             arrange(year_of_birth) %>% 
+             select(c(ethnicity, year_of_birth, childs_first_name)) %>% 
+             pivot_wider(ethnicity, names_from = "year_of_birth", values_from = "childs_first_name")
+knitr::kable(male_names, caption = "Most popular Male Baby Names in NYC over the Years")
 ```
 
 ## Creating Plot
 ```{r}
-male_wnh_2016_plot = ggplot(filter(baby_names, gender == "MALE", ethnicity == "WHITE NON HISPANIC", year_of_birth == 2016),
-       aes(x = rank, y = count )) + geom_point() + ggtitle("2016 White Male Non Hispanic Popular Names")
-
-male_wnh_2016_plot
-
-#ggsave(Nmaes_plot.pdf, male_wnh_2016_plot, width = 8, height = 5)
+ggplot(filter(baby_names, gender == "MALE", ethnicity == "WHITE NON HISPANIC", year_of_birth == 2016),
+       aes(x = rank, y = count )) + geom_point() + ggtitle("White Male Non Hispanic NYC Baby Names by Rank and Count from 2016")
 ```
 
