@@ -17,8 +17,7 @@ trash_wheel = read_excel("./Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet 
   filter(!(str_detect(month, "Total"))) %>% 
   mutate(
     sports_balls = round(sports_balls, digits = 0),
-    month = str_to_lower(month),
-    month = str_replace_all(month,"decemeber", "december")
+    month = str_replace_all(month,"Decemeber", "December")
   ) 
 ```
 
@@ -40,7 +39,7 @@ rain_2018 = read_excel("./Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet = 
 ```{r}
 rain_data = bind_rows(rain_2018, rain_2019) %>% 
   mutate(
-    month = str_to_lower(month.name[month])
+    month = (month.name[month])
   )
 ```
 
@@ -58,7 +57,7 @@ pols_month = read_csv("./pols-month.csv", show_col_types = F) %>%
   separate(mon, into = c("year","month", "day"), sep = "-") %>% 
   mutate(year = as.integer(year)) %>% 
   mutate(month = as.integer(month)) %>% 
-  mutate(month = str_to_lower(month.name[month])) %>% 
+  mutate(month = (month.name[month])) %>% 
   mutate(prez_dem = ifelse(prez_dem == 1, "dem", "")) %>% 
   mutate(prez_gop = ifelse(prez_gop == 1, "gop", "")) %>% 
   mutate(president = paste(prez_gop,prez_dem)) %>% 
@@ -75,7 +74,7 @@ snp = read_csv("./snp.csv", show_col_types = F) %>%
   mutate(year = as.integer(year)) %>% 
   mutate(year = (ifelse(year <= 15, year + 2000, year + 1900))) %>% 
   mutate(month = as.integer(month)) %>%
-  mutate(month = str_to_lower(month.name[month])) %>% 
+  mutate(month = (month.name[month])) %>% 
   subset(select = -(day)) %>% 
   relocate(year, month)
 ```
@@ -90,7 +89,7 @@ unemployment = read_csv("./unemployment.csv", show_col_types = F) %>%
     values_to = "percent_unemployed"
   ) %>% 
   mutate(month = match(month, tolower(month.abb))) %>% 
-  mutate(month = str_to_lower(month.name[month]))
+  mutate(month = (month.name[month]))
 ```
 
 ## Merge unemployment, snp, and pols_month
@@ -116,7 +115,7 @@ baby_names = read_csv("./Popular_Baby_Names.csv", show_col_types = F) %>%
   unique() %>% 
   mutate(ethnicity = str_replace_all(ethnicity,"ASIAN AND PACI$", "ASIAN AND PACIFIC ISLANDER")) %>% 
   mutate(ethnicity = str_replace_all(ethnicity,"BLACK NON HISP$", "BLACK NON HISPANIC")) %>% 
-  mutate(ethnicity = str_replace_all(ethnicity,"WHITE NON HISP$", "WHITE NON HISPANIC")) %>% 
+  mutate(ethnicity = str_replace_all(ethnicity,"WHITE NON HISP$", "WHITE NON HISPANIC"))
   # did you make all names and ehtnicty lower case
 
 ```
@@ -136,7 +135,6 @@ male_names = subset(male_names, select = c(ethnicity, year_of_birth, childs_firs
 male_names = pivot_wider(male_names, ethnicity, names_from = "year_of_birth", values_from = "childs_first_name")
 knitr::kable(male_names)
 ```
-
 
 ## Creating Plot
 ```{r}
